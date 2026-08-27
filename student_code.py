@@ -45,10 +45,21 @@ def robot_navigation(nodes):
         current = nodes[i]
         next = nodes[i + 1]
 
-        if current in visited:
+
+        # Checks for cyclical nature, by checking current node against the set of visited nodes
+        # Also checks for cycles with the last node in the list being the one that causes it to be cyclical (given case) by checking against next.
+        if current in visited or next in visited:
             return -2
         visited.add(current)
 
-        if
-            #placeholder for now - coding the rest of the traversal logic later
 
+        # Checks for invalid paths (i.e node list {a, z})
+        if next not in GRAPH[current]:
+            return -1
+
+        total_weight += GRAPH[current][next]
+
+
+    if nodes[-1] == "z":
+        return (total_weight, "z")
+    return 0
