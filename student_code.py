@@ -16,5 +16,23 @@ def part_1_graph():
 
     return graph
 
+# Part 2 is defined below - list of lists
+def part_2_graph():
+    """Represents the second graph & returns it as a list of lists"""
+    nodes_dict = {'a':0, 'b':1, 'c':2, 'd':3, 'e':4}
+    graph = [[] for _ in range (len(nodes_dict))]
+
+    # Adding all the node paths into lists using .append (different methods for lists vs sets.)
+    graph[nodes_dict['a']].append(nodes_dict['a'])
+    graph[nodes_dict['a']].append(nodes_dict['b'])
+    graph[nodes_dict['a']].append(nodes_dict['e'])
+    graph[nodes_dict['b']].append(nodes_dict['c'])
+    graph[nodes_dict['c']].append(nodes_dict['a'])
+    graph[nodes_dict['c']].append(nodes_dict['d'])
+    graph[nodes_dict['c']].append(nodes_dict['e'])
+    graph[nodes_dict['e']].append(nodes_dict['d'])
+
+    return graph
+
 
 
