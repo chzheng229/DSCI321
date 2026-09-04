@@ -1,71 +1,38 @@
-# DSCI321 Coding Assignment 1 - Charlie Zheng
-"""Robot Navigation Assignment - has a robot travel along given path in weighted graph"""
+# DSCI321 Coding Assignment 2 - Charlie Zheng
+"""Representing graphs in functions using a variety of data structures"""
 
-# Defined below is the nested dictionary w/ nodes and weights.
+# Part 1 is defined below - list of sets
 
-GRAPH = {
-    "a": {"b":1, "d":5},
-    "b": {"c":2, "f":5},
-    "c": {"e":1, "h":3},
-    "d": {"f":3},
-    "e": {"d":3, "i":2},
-    "f": {"e":4, "g":3, "i":3},
-    "g": {"h":2, "k":2},
-    "h": {"i":1, "j":2, "z": 4},
-    "i": {"j":4, "k":2},
-    "j": {"c":1, "k":3, "z":4},
-    "k": {"z":3},
-    "z": {}
-}
+def part_1_graph():
+    nodes_dict = {'a':0, 'b':1, 'c':2, 'd':3, 'e':4}
+    graph = [set() for _ in range (len(nodes_dict))]
 
-def robot_navigation(nodes):
-    """Function takes a list of strings as nodes and has a robot travel along it
-    Function weighs the paths that the robot takes ands sums. Also checks for invalid node paths
-    """
-    # Invalidity Check
-    #  if nodes is a list
-    if not isinstance(nodes, list):
-        return -1
+    graph[nodes_dict['a']].add(nodes_dict['b'])
+    graph[nodes_dict['a']].add(nodes_dict['e'])
+    graph[nodes_dict['b']].add(nodes_dict['c'])
+    graph[nodes_dict['c']].add(nodes_dict['d'])
+    graph[nodes_dict['c']].add(nodes_dict['e'])
+    graph[nodes_dict['d']].add(nodes_dict['b'])
 
-    # Check if nodes is not empty
-    if len(nodes) == 0:
-        return -1
+    return graph
 
-    # Check if nodes is all strings
-    if not all(isinstance(node, str) for node in nodes):
-        return -1
+# Part 2 is defined below - list of lists
+def part_2_graph():
+    """Represents the second graph & returns it as a list of lists"""
+    nodes_dict = {'a':0, 'b':1, 'c':2, 'd':3, 'e':4}
+    graph = [[] for _ in range (len(nodes_dict))]
 
-    # Check if Nodes not starting at A
-    if nodes[0] != 'a':
-        return -1
+    # Adding all the node paths into lists using .append (different methods for lists vs sets.)
+    graph[nodes_dict['a']].append(nodes_dict['a'])
+    graph[nodes_dict['a']].append(nodes_dict['b'])
+    graph[nodes_dict['a']].append(nodes_dict['e'])
+    graph[nodes_dict['b']].append(nodes_dict['c'])
+    graph[nodes_dict['c']].append(nodes_dict['a'])
+    graph[nodes_dict['c']].append(nodes_dict['d'])
+    graph[nodes_dict['c']].append(nodes_dict['e'])
+    graph[nodes_dict['e']].append(nodes_dict['d'])
 
-    # Check if all the nodes provided in argument are valid nodes
-    if not all(n in GRAPH for n in nodes):
-        return -1
-
-    # Node Traversal Logic
-    visited = set()
-    total_weight = 0
-
-    for i in range(len(nodes) - 1):
-        current = nodes[i]
-        next_node = nodes[i + 1]
+    return graph
 
 
-        # Checks for cyclical nature, by checking current node against the set of visited nodes
-        # Also checks for cycles with the last node in the list causing it to be cyclical
-        if current in visited or next_node in visited:
-            return -2
-        visited.add(current)
 
-
-        # Checks for invalid paths (i.e. node list {a, z})
-        if next_node not in GRAPH[current]:
-            return -1
-
-        total_weight += GRAPH[current][next_node]
-
-
-    if nodes[-1] == "z":
-        return total_weight, "z"
-    return 0, nodes[-1]
