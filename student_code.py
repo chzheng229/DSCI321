@@ -1,71 +1,36 @@
-# DSCI321 Coding Assignment 1 - Charlie Zheng
-"""Robot Navigation Assignment - has a robot travel along given path in weighted graph"""
+class VersatileDigraph:
+    def __init__(self):
+        # Initialization of the class
+        self.nodes = {}
 
-# Defined below is the nested dictionary w/ nodes and weights.
+        self.edges = {}
 
-GRAPH = {
-    "a": {"b":1, "d":5},
-    "b": {"c":2, "f":5},
-    "c": {"e":1, "h":3},
-    "d": {"f":3},
-    "e": {"d":3, "i":2},
-    "f": {"e":4, "g":3, "i":3},
-    "g": {"h":2, "k":2},
-    "h": {"i":1, "j":2, "z": 4},
-    "i": {"j":4, "k":2},
-    "j": {"c":1, "k":3, "z":4},
-    "k": {"z":3},
-    "z": {}
-}
+        self.edge_names = {}
 
-def robot_navigation(nodes):
-    """Function takes a list of strings as nodes and has a robot travel along it
-    Function weighs the paths that the robot takes ands sums. Also checks for invalid node paths
-    """
-    # Invalidity Check
-    #  if nodes is a list
-    if not isinstance(nodes, list):
-        return -1
+    def add_node(self, node_id, node_value = 0):
+        # Method to add nodes that don't already exist in the graph - also serves as a check against duplicate nodes
+        if node_id not in self.nodes:
+            self.nodes[node_id] = node_value
 
-    # Check if nodes is not empty
-    if len(nodes) == 0:
-        return -1
+    def add_edge(self, start_node_id, end_node_id, start_node_value = 0, end_node_value = 0, edge_name=None, edge_weight = 0):
+        self.add_node(start_node_id, start_node_value)
+        self.add_node(end_node_id, end_node_value)
 
-    # Check if nodes is all strings
-    if not all(isinstance(node, str) for node in nodes):
-        return -1
+        # If edge name isn't supplied by user - names the edge for you.
+        if edge_name is None:
+            counter = 1
+            candidate_name = f"edge{counter}"
+            while candidate_name in self.edge_names.get(start_node_id, {}):
+                counter += 1
+                candidate_name = f"edge{counter}"
+            edge_name = candidate_name
 
-    # Check if Nodes not starting at A
-    if nodes[0] != 'a':
-        return -1
-
-    # Check if all the nodes provided in argument are valid nodes
-    if not all(n in GRAPH for n in nodes):
-        return -1
-
-    # Node Traversal Logic
-    visited = set()
-    total_weight = 0
-
-    for i in range(len(nodes) - 1):
-        current = nodes[i]
-        next_node = nodes[i + 1]
+        
 
 
-        # Checks for cyclical nature, by checking current node against the set of visited nodes
-        # Also checks for cycles with the last node in the list causing it to be cyclical
-        if current in visited or next_node in visited:
-            return -2
-        visited.add(current)
 
 
-        # Checks for invalid paths (i.e. node list {a, z})
-        if next_node not in GRAPH[current]:
-            return -1
-
-        total_weight += GRAPH[current][next_node]
 
 
-    if nodes[-1] == "z":
-        return total_weight, "z"
-    return 0, nodes[-1]
+
+
