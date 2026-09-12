@@ -21,3 +21,10 @@ print("Test 4 - all nodes:", g.get_nodes())
 # Test 5: full print_graph output
 print("Test 5 - full graph:")
 g.print_graph()
+
+# Test 6: duplicate edge name for the same start node should raise ValueError
+try:
+    g.add_edge("A", "C", edge_name="edge1")  # "edge1" already used for A -> should raise
+    print("Test 6 FAILED - expected ValueError but none was raised")
+except ValueError as e:
+    print("Test 6 PASSED - correctly raised ValueError:", e)

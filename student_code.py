@@ -1,14 +1,14 @@
 # DSCI321 W3 Assignment - Charlie Zheng
-""""""
+"""Implementation of the VersatileDigraph class for DSCI321 Week 3."""
 class VersatileDigraph:
     """Class to represent a digraph, with edge weights, edge names, node id, node value, etc."""
+
     def __init__(self):
-        # Initialization of the class
+        """Initialize the digraph with empty dicts for nodes edges and edge names."""
         self.nodes = {}
-
         self.edges = {}
-
         self.edge_names = {}
+        self.next_edge_counter = {}  # start_node_id -> next number to try for auto-naming
 
     def add_node(self, node_id, node_value = 0):
         """ Add a node to the digraph """
@@ -16,19 +16,24 @@ class VersatileDigraph:
         if node_id not in self.nodes:
             self.nodes[node_id] = node_value
 
-    def add_edge(self, start_node_id, end_node_id, start_node_value = 0, end_node_value = 0, edge_name=None, edge_weight = 0):
+    def add_edge(self, start_node_id, end_node_id, start_node_value=0,
+                 end_node_value=0, edge_name=None, edge_weight=0):
         """ Add an edge to the digraph """
         self.add_node(start_node_id, start_node_value)
         self.add_node(end_node_id, end_node_value)
 
         # If edge name isn't supplied by user - names the edge for you.
         if edge_name is None:
-            counter = 1
+            counter = self.next_edge_counter.get(start_node_id, 1)
             candidate_name = f"edge{counter}"
             while candidate_name in self.edge_names.get(start_node_id, {}):
                 counter += 1
                 candidate_name = f"edge{counter}"
             edge_name = candidate_name
+            self.next_edge_counter[start_node_id] = counter + 1
+        else:
+            if edge_name in self.edge_names.get(start_node_id, {}):
+                raise ValueError("Edge name already exists")
 
         if start_node_id not in self.edges:
             self.edges[start_node_id] = {}
@@ -64,4 +69,6 @@ class VersatileDigraph:
             for end_node_id, edge_info in edges_from_start.items():
                 weight = edge_info["weight"]
                 name = edge_info["name"]
-                print(f"Edge from {start_node_id} to {end_node_id} with weight {weight} and name {name}")
+                message = (f"Edge from {start_node_id} to {end_node_id} "
+                           f"with weight {weight} and name {name}")
+                print(message)
