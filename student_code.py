@@ -79,7 +79,8 @@ class VersatileDigraph:
 
     def predecessors(self, node_id):
         """Return a list of nodes that immediately precede the given node."""
-        return [start_node for start_node, edges_from_start in self.edges.items() if node_id in edges_from_start]
+        return [start_node for start_node, edges_from_start in self.edges.items()
+                if node_id in edges_from_start]
 
     def successor_on_edge(self, start_node_id, edge_name):
         """Return the node that immediately succeed the given edge."""
