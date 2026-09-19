@@ -1,71 +1,94 @@
-# DSCI321 Coding Assignment 1 - Charlie Zheng
-"""Robot Navigation Assignment - has a robot travel along given path in weighted graph"""
+# DSCI321 W3 Assignment - Charlie Zheng
+"""Implementation of the VersatileDigraph class for DSCI321 Week 3."""
+class VersatileDigraph:
+    """Class to represent a digraph, with edge weights, edge names, node id, node value, etc."""
 
-# Defined below is the nested dictionary w/ nodes and weights.
+    def __init__(self):
+        """Initialize the digraph with empty dicts for nodes edges and edge names."""
+        self.nodes = {}
+        self.edges = {}
+        self.edge_names = {}
+        self.next_edge_counter = {}  # start_node_id -> next number to try for auto-naming
 
-GRAPH = {
-    "a": {"b":1, "d":5},
-    "b": {"c":2, "f":5},
-    "c": {"e":1, "h":3},
-    "d": {"f":3},
-    "e": {"d":3, "i":2},
-    "f": {"e":4, "g":3, "i":3},
-    "g": {"h":2, "k":2},
-    "h": {"i":1, "j":2, "z": 4},
-    "i": {"j":4, "k":2},
-    "j": {"c":1, "k":3, "z":4},
-    "k": {"z":3},
-    "z": {}
-}
+    def add_node(self, node_id, node_value = 0):
+        """ Add a node to the digraph """
+        # Adds nodes that don't exist in the graph, serves as a check against duplicate nodes
+        if node_id not in self.nodes:
+            self.nodes[node_id] = node_value
 
-def robot_navigation(nodes):
-    """Function takes a list of strings as nodes and has a robot travel along it
-    Function weighs the paths that the robot takes ands sums. Also checks for invalid node paths
-    """
-    # Invalidity Check
-    #  if nodes is a list
-    if not isinstance(nodes, list):
-        return -1
+    def add_edge(self, start_node_id, end_node_id, start_node_value=0,
+                 end_node_value=0, edge_name=None, edge_weight=0):
+        """ Add an edge to the digraph """
+        self.add_node(start_node_id, start_node_value)
+        self.add_node(end_node_id, end_node_value)
 
-    # Check if nodes is not empty
-    if len(nodes) == 0:
-        return -1
+        # If edge name isn't supplied by user - names the edge for you.
+        if edge_name is None:
+            counter = self.next_edge_counter.get(start_node_id, 1)
+            candidate_name = f"edge{counter}"
+            while candidate_name in self.edge_names.get(start_node_id, {}):
+                counter += 1
+                candidate_name = f"edge{counter}"
+            edge_name = candidate_name
+            self.next_edge_counter[start_node_id] = counter + 1
+        else:
+            if edge_name in self.edge_names.get(start_node_id, {}):
+                raise ValueError("Edge name already exists")
 
-    # Check if nodes is all strings
-    if not all(isinstance(node, str) for node in nodes):
-        return -1
+        if start_node_id not in self.edges:
+            self.edges[start_node_id] = {}
 
-    # Check if Nodes not starting at A
-    if nodes[0] != 'a':
-        return -1
+        if start_node_id not in self.edge_names:
+            self.edge_names[start_node_id] = {}
 
-    # Check if all the nodes provided in argument are valid nodes
-    if not all(n in GRAPH for n in nodes):
-        return -1
+        self.edges[start_node_id][end_node_id] = {"weight": edge_weight, "name": edge_name}
+        self.edge_names[start_node_id][edge_name] = end_node_id
 
-    # Node Traversal Logic
-    visited = set()
-    total_weight = 0
+    def get_nodes(self):
+        """ Return a list of all nodes """
+        # Returns the list of nodes (which are keys) as a list.
+        return list(self.nodes.keys())
 
-    for i in range(len(nodes) - 1):
-        current = nodes[i]
-        next_node = nodes[i + 1]
+    def get_edge_weight(self, start_node_id, end_node_id):
+        """ Return the edge weight of the edge between two nodes """
+        # Returns the weight of a specific edge using the start and end node to search the dict
+        return self.edges[start_node_id][end_node_id]["weight"]
 
+    def get_node_value(self, node_id):
+        """ Return the value of the node """
+        # Returns the value of a node
+        return self.nodes[node_id]
 
-        # Checks for cyclical nature, by checking current node against the set of visited nodes
-        # Also checks for cycles with the last node in the list causing it to be cyclical
-        if current in visited or next_node in visited:
-            return -2
-        visited.add(current)
+    def print_graph(self):
+        """ Print the digraph using nodes and edges - returns as text"""
+        for node_id in self.get_nodes():
+            node_value = self.get_node_value(node_id)
+            print(f"Node {node_id} with value {node_value}")
 
+        for start_node_id, edges_from_start in self.edges.items():
+            for end_node_id, edge_info in edges_from_start.items():
+                weight = edge_info["weight"]
+                name = edge_info["name"]
+                message = (f"Edge from {start_node_id} to {end_node_id} "
+                           f"with weight {weight} and name {name}")
+                print(message)
 
-        # Checks for invalid paths (i.e. node list {a, z})
-        if next_node not in GRAPH[current]:
-            return -1
+    def successors(self, node_id):
+        """Return a list of nodes that immediately succeed the given node."""
+        return [end_node for end_node in self.edges.get(node_id, {})]
 
-        total_weight += GRAPH[current][next_node]
+    def predecessors(self, node_id):
+        """Return a list of nodes that immediately precede the given node."""
+        return [start_node for start_node in self.edges if node_id in self.edges[start_node]]
 
+    def successor_on_edge(self, start_node_id, edge_name):
+        """Return the node that immediately succeed the given edge."""
+        return self.edge_names[start_node_id][edge_name]
 
-    if nodes[-1] == "z":
-        return total_weight, "z"
-    return 0, nodes[-1]
+    def outdegree(self, node_id):
+        """Return the number of outgoing edges from the given node."""
+        return len(self.successors(node_id))
+
+    def indegree(self, node_id):
+        """Return the number of incoming edges to the given node."""
+        return len(self.predecessors(node_id))
