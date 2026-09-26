@@ -52,6 +52,9 @@ class VersatileDigraph:
         if not isinstance(edge_weight, (int, float)):
             raise TypeError(f"edge_weight must be a number, got {type(edge_weight).__name__}")
 
+        if edge_weight < 0:
+            raise ValueError(f"edge_weight must be non-negative, got {edge_weight}")
+
         self.add_node(start_node_id, start_node_value)
         self.add_node(end_node_id, end_node_value)
 
@@ -128,12 +131,19 @@ class VersatileDigraph:
         if not isinstance(node_id, str):
             raise TypeError(f"node_id must be a string, got {type(node_id).__name__}")
 
+        if node_id not in self.nodes:
+            raise KeyError(f"Node {node_id} does not exist")
+
         return [end_node for end_node in self.edges.get(node_id, {})]
 
     def predecessors(self, node_id):
         """Return a list of nodes that immediately precede the given node."""
         if not isinstance(node_id, str):
             raise TypeError(f"node_id must be a string, got {type(node_id).__name__}")
+
+        if node_id not in self.nodes:
+            raise KeyError(f"Node {node_id} does not exist")
+
 
         return [start_node for start_node, edges_from_start in self.edges.items()
                 if node_id in edges_from_start]
@@ -159,12 +169,20 @@ class VersatileDigraph:
         if not isinstance(node_id, str):
             raise TypeError(f"node_id must be a string, got {type(node_id).__name__}")
 
+        if node_id not in self.nodes:
+            raise KeyError(f"Node {node_id} does not exist")
+
+
         return len(self.successors(node_id))
 
     def in_degree(self, node_id):
         """Return the number of incoming edges to the given node."""
         if not isinstance(node_id, str):
             raise TypeError(f"node_id must be a string, got {type(node_id).__name__}")
+
+        if node_id not in self.nodes:
+            raise KeyError(f"Node {node_id} does not exist")
+
 
         return len(self.predecessors(node_id))
 
