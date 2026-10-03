@@ -218,23 +218,20 @@ class VersatileDigraph:
 
 class BinaryGraph(VersatileDigraph):
     """A binary tree built on top of VersatileDigraph, using left and right as edge names."""
-    # Doesn't need a init method - inherits one that works
+    def __init__(self):
+        """Initialize the binary graph with a root node."""
+        super().__init__()
+        self.add_node("Root", 0)
 
-    def add_node_left(self, child_id, child_value, parent_id=None):
-        """add a left child node - if no parent is given, adds a standalone root node."""
-        if parent_id is None:
-            self.add_node(child_id, child_value)
-        else:
-            self.add_edge(start_node_id=parent_id, end_node_id=child_id,
-                          end_node_value=child_value, edge_name="left")
+    def add_node_left(self, child_id, child_value, parent_id="Root"):
+        """add a left child node to the given parent (defaults to 'Root')."""
+        self.add_edge(start_node_id=parent_id, end_node_id=child_id,
+                      end_node_value=child_value, edge_name="left")
 
-    def add_node_right(self, child_id, child_value, parent_id=None):
-        """add a right child node - if no parent is given, adds a standalone root node."""
-        if parent_id is None:
-            self.add_node(child_id, child_value)
-        else:
-            self.add_edge(start_node_id=parent_id, end_node_id=child_id,
-                          end_node_value=child_value, edge_name="right")
+    def add_node_right(self, child_id, child_value, parent_id="Root"):
+        """add a right child node to the given parent (defaults to 'Root')."""
+        self.add_edge(start_node_id=parent_id, end_node_id=child_id,
+                      end_node_value=child_value, edge_name="right")
 
     def get_node_left(self, parent_id):
         """returns the id of the left child node for parent node given its parent id."""
