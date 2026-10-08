@@ -298,5 +298,5 @@ class SortingTree(BinaryGraph):
             result += self.traverse(self.get_node_right(current_id))
 
         if is_top_call:
-            print(result)
+            print(" ".join(str(v) for v in result) + " ", end="")
         return result
