@@ -255,10 +255,8 @@ class SortingTree(BinaryGraph):
     def insert(self, value, current_id=None):
         """Insert a value into the search tree, using recursion."""
         if self.root_id is None:
-            new_id = f"{value}_{self.next_node_number}"
-            self.add_node(new_id, value)
-            self.next_node_number += 1
-            self.root_id = new_id
+            self.nodes["Root"] = value  # "Root" already exists with value 0; give it the real value
+            self.root_id = "Root"
             return
 
         if current_id is None:
