@@ -244,11 +244,13 @@ class BinaryGraph(VersatileDigraph):
 class SortingTree(BinaryGraph):
     """A binary search tree built on BinaryGraph, right is > root, left < root"""
 
-    def __init__(self):
-        """Set up the parent graph, then add a counter for making unique node ids."""
+    def __init__(self, root_value=None):
+        """Set up the parent graph, optionally inserting a first value as the root."""
         super().__init__()
         self.next_node_number = 1
         self.root_id = None
+        if root_value is not None:
+            self.insert(root_value)
 
     def insert(self, value, current_id=None):
         """Insert a value into the search tree, using recursion."""
@@ -280,8 +282,11 @@ class SortingTree(BinaryGraph):
                 self.next_node_number += 1
 
     def traverse(self, current_id=None):
-        """Return a sorted list of the tree's values, using recursion."""
+        """Display and return a sorted list of the tree's values, using recursion."""
+        is_top_call = current_id is None
+
         if self.root_id is None:
+            print([])
             return []
 
         if current_id is None:
@@ -293,4 +298,7 @@ class SortingTree(BinaryGraph):
         result.append(self.get_node_value(current_id))
         if "right" in self.edge_names.get(current_id, {}):
             result += self.traverse(self.get_node_right(current_id))
+
+        if is_top_call:
+            print(result)
         return result
