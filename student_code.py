@@ -3,6 +3,7 @@
 import graphviz
 from bokeh.plotting import figure, show
 
+
 class VersatileDigraph:
     """Class to represent a digraph, with edge weights, edge names, node id, node value, etc."""
 
@@ -111,7 +112,6 @@ class VersatileDigraph:
             raise KeyError(f"Node {node_id} does not exist")
         return self.nodes[node_id]
 
-
     def print_graph(self):
         """ Print the digraph using nodes and edges - returns as text"""
         for node_id in self.get_nodes():
@@ -144,7 +144,6 @@ class VersatileDigraph:
         if node_id not in self.nodes:
             raise KeyError(f"Node {node_id} does not exist")
 
-
         return [start_node for start_node, edges_from_start in self.edges.items()
                 if node_id in edges_from_start]
 
@@ -172,7 +171,6 @@ class VersatileDigraph:
         if node_id not in self.nodes:
             raise KeyError(f"Node {node_id} does not exist")
 
-
         return len(self.successors(node_id))
 
     def in_degree(self, node_id):
@@ -182,7 +180,6 @@ class VersatileDigraph:
 
         if node_id not in self.nodes:
             raise KeyError(f"Node {node_id} does not exist")
-
 
         return len(self.predecessors(node_id))
 
@@ -216,23 +213,23 @@ class VersatileDigraph:
         p.vbar(x=labels, top=weights, width=0.5)
         show(p)
 
+
 class SortableDigraph(VersatileDigraph):
-     """A subclass of previous week's versatile digraph - can be topologically sorted."""
+    """A subclass of previous week's versatile digraph - can be topologically sorted."""
 
-     def top_sort(self):
-         """Returns a list of the nodes in the graph topologically sorted."""
+    def top_sort(self):
+        """Returns a list of the nodes in the graph topologically sorted."""
 
-         count = {u: self.in_degree(u) for u in self.get_nodes()}
-         queue = [u for u in self.get_nodes() if count[u] == 0]
-         results = []
-         while queue:
-             u = queue.pop()
-             results.append(u)
-             for v in self.successors(u):
-                 count[v] -= 1
-                 if count[v] == 0:
-                     queue.append(v)
-         if len(results) != len(self.get_nodes()):
+        count = {u: self.in_degree(u) for u in self.get_nodes()}
+        queue = [u for u in self.get_nodes() if count[u] == 0]
+        results = []
+        while queue:
+            u = queue.pop()
+            results.append(u)
+            for v in self.successors(u):
+                count[v] -= 1
+                if count[v] == 0:
+                    queue.append(v)
+        if len(results) != len(self.get_nodes()):
             raise ValueError("Graph has a cycle, this is unable to be topologically sorted.")
-         return results
-
+        return results
