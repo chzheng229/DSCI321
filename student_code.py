@@ -1,4 +1,4 @@
-# DSCI321 W7 Assignment - Charlie Zheng
+# DSCI321 W9 Assignment - Charlie Zheng
 """Implementation of the VersatileDigraph class for DSCI321 Week 7."""
 import graphviz
 from bokeh.plotting import figure, show
@@ -216,81 +216,23 @@ class VersatileDigraph:
         p.vbar(x=labels, top=weights, width=0.5)
         show(p)
 
-class BinaryGraph(VersatileDigraph):
-    """A binary tree built on top of VersatileDigraph, using left and right as edge names."""
-    def __init__(self):
-        """Initialize the binary graph with a root node."""
-        super().__init__()
-        self.add_node("Root", 0)
+class SortableDigraph(VersatileDigraph):
+     """A subclass of previous week's versatile digraph - can be topologically sorted."""
 
-    def add_node_left(self, child_id, child_value, parent_id="Root"):
-        """add a left child node to the given parent (defaults to 'Root')."""
-        self.add_edge(start_node_id=parent_id, end_node_id=child_id,
-                      end_node_value=child_value, edge_name="left")
+     def top_sort(self):
+         """Returns a list of the nodes in the graph topologically sorted."""
 
-    def add_node_right(self, child_id, child_value, parent_id="Root"):
-        """add a right child node to the given parent (defaults to 'Root')."""
-        self.add_edge(start_node_id=parent_id, end_node_id=child_id,
-                      end_node_value=child_value, edge_name="right")
+         count = {u: self.in_degree(u) for u in self.get_nodes()}
+         queue = [u for u in self.get_nodes() if count[u] == 0]
+         results = []
+         while queue:
+             u = queue.pop()
+             results.append(u)
+             for v in self.successors(u):
+                 count[v] -= 1
+                 if count[v] == 0:
+                     queue.append(v)
+         if len(results) != len(self.get_nodes()):
+            raise ValueError("Graph has a cycle, this is unable to be topologically sorted.")
+         return results
 
-    def get_node_left(self, parent_id):
-        """returns the id of the left child node for parent node given its parent id."""
-        return self.successor_on_edge(start_node_id=parent_id,edge_name="left")
-
-    def get_node_right(self, parent_id):
-        """returns the id of the right child node for parent node given its parent id."""
-        return self.successor_on_edge(start_node_id=parent_id,edge_name="right")
-
-class SortingTree(BinaryGraph):
-    """A binary search tree built on BinaryGraph, right is > root, left < root"""
-
-    def __init__(self):
-        """Set up the parent graph, then add a counter for making unique node ids."""
-        super().__init__()
-        self.next_node_number = 1
-        self.root_id = None
-
-    def insert(self, value, current_id=None):
-        """Insert a value into the search tree, using recursion."""
-        if self.root_id is None:
-            new_id = f"{value}_{self.next_node_number}"
-            self.add_node(new_id, value)
-            self.next_node_number += 1
-            self.root_id = new_id
-            return
-
-        if current_id is None:
-            current_id = self.root_id
-
-        current_value = self.get_node_value(current_id)
-
-        if value < current_value:
-            if "left" in self.edge_names.get(current_id, {}):
-                self.insert(value, self.get_node_left(current_id))
-            else:
-                new_id = f"{value}_{self.next_node_number}"
-                self.add_node_left(new_id, value, current_id)
-                self.next_node_number += 1
-        else:
-            if "right" in self.edge_names.get(current_id, {}):
-                self.insert(value, self.get_node_right(current_id))
-            else:
-                new_id = f"{value}_{self.next_node_number}"
-                self.add_node_right(new_id, value, current_id)
-                self.next_node_number += 1
-
-    def traverse(self, current_id=None):
-        """Return a sorted list of the tree's values, using recursion."""
-        if self.root_id is None:
-            return []
-
-        if current_id is None:
-            current_id = self.root_id
-
-        result = []
-        if "left" in self.edge_names.get(current_id, {}):
-            result += self.traverse(self.get_node_left(current_id))
-        result.append(self.get_node_value(current_id))
-        if "right" in self.edge_names.get(current_id, {}):
-            result += self.traverse(self.get_node_right(current_id))
-        return result
