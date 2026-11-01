@@ -239,7 +239,7 @@ class TraversableDigraph(SortableDigraph):
     """A sortable digraph that can be traversed depth-first or breadth-first."""
 
     def dfs(self, start_node_id):
-        """Yield nodes in depth-first order, starting from start_node_id."""
+        """Yield nodes depth-first from start_node_id, not including the start node."""
         if start_node_id not in self.nodes:
             raise KeyError(f"Node {start_node_id} does not exist")
         visited, stack = set(), [start_node_id]
@@ -249,10 +249,11 @@ class TraversableDigraph(SortableDigraph):
                 continue
             visited.add(node)
             stack.extend(self.successors(node))
-            yield node
+            if node != start_node_id:
+                yield node
 
     def bfs(self, start_node_id):
-        """Yield nodes in breadth-first order, starting from start_node_id."""
+        """Yield nodes breadth-first from start_node_id, not including the start node."""
         if start_node_id not in self.nodes:
             raise KeyError(f"Node {start_node_id} does not exist")
         visited, queue = set(), deque([start_node_id])
@@ -262,7 +263,8 @@ class TraversableDigraph(SortableDigraph):
                 continue
             visited.add(node)
             queue.extend(self.successors(node))
-            yield node
+            if node != start_node_id:
+                yield node
 
 class DAG(TraversableDigraph):
     """A traversable digraph that refuses any edge that would create a cycle."""
