@@ -1,7 +1,9 @@
-# DSCI321 W7 Assignment - Charlie Zheng
-"""Implementation of the VersatileDigraph class for DSCI321 Week 7."""
+# DSCI321 W10 Assignment - Charlie Zheng
+"""Implementation of the VersatileDigraph class and all the subclasses under for DSCI321 Week 10."""
+from collections import deque
 import graphviz
 from bokeh.plotting import figure, show
+
 
 class VersatileDigraph:
     """Class to represent a digraph, with edge weights, edge names, node id, node value, etc."""
@@ -111,7 +113,6 @@ class VersatileDigraph:
             raise KeyError(f"Node {node_id} does not exist")
         return self.nodes[node_id]
 
-
     def print_graph(self):
         """ Print the digraph using nodes and edges - returns as text"""
         for node_id in self.get_nodes():
@@ -144,7 +145,6 @@ class VersatileDigraph:
         if node_id not in self.nodes:
             raise KeyError(f"Node {node_id} does not exist")
 
-
         return [start_node for start_node, edges_from_start in self.edges.items()
                 if node_id in edges_from_start]
 
@@ -172,7 +172,6 @@ class VersatileDigraph:
         if node_id not in self.nodes:
             raise KeyError(f"Node {node_id} does not exist")
 
-
         return len(self.successors(node_id))
 
     def in_degree(self, node_id):
@@ -182,7 +181,6 @@ class VersatileDigraph:
 
         if node_id not in self.nodes:
             raise KeyError(f"Node {node_id} does not exist")
-
 
         return len(self.predecessors(node_id))
 
@@ -216,81 +214,68 @@ class VersatileDigraph:
         p.vbar(x=labels, top=weights, width=0.5)
         show(p)
 
-class BinaryGraph(VersatileDigraph):
-    """A binary tree built on top of VersatileDigraph, using left and right as edge names."""
-    def __init__(self):
-        """Initialize the binary graph with a root node."""
-        super().__init__()
-        self.add_node("Root", 0)
 
-    def add_node_left(self, child_id, child_value, parent_id="Root"):
-        """add a left child node to the given parent (defaults to 'Root')."""
-        self.add_edge(start_node_id=parent_id, end_node_id=child_id,
-                      end_node_value=child_value, edge_name="left")
+class SortableDigraph(VersatileDigraph):
+    """A subclass of previous week's versatile digraph - can be topologically sorted."""
 
-    def add_node_right(self, child_id, child_value, parent_id="Root"):
-        """add a right child node to the given parent (defaults to 'Root')."""
-        self.add_edge(start_node_id=parent_id, end_node_id=child_id,
-                      end_node_value=child_value, edge_name="right")
+    def top_sort(self):
+        """Returns a list of the nodes in the graph topologically sorted."""
 
-    def get_node_left(self, parent_id):
-        """returns the id of the left child node for parent node given its parent id."""
-        return self.successor_on_edge(start_node_id=parent_id,edge_name="left")
+        count = {u: self.in_degree(u) for u in self.get_nodes()}
+        queue = [u for u in self.get_nodes() if count[u] == 0]
+        results = []
+        while queue:
+            u = queue.pop()
+            results.append(u)
+            for v in self.successors(u):
+                count[v] -= 1
+                if count[v] == 0:
+                    queue.append(v)
+        if len(results) != len(self.get_nodes()):
+            raise ValueError("Graph has a cycle, this is unable to be topologically sorted.")
+        return results
 
-    def get_node_right(self, parent_id):
-        """returns the id of the right child node for parent node given its parent id."""
-        return self.successor_on_edge(start_node_id=parent_id,edge_name="right")
+class TraversableDigraph(SortableDigraph):
+    """A sortable digraph that can be traversed depth-first or breadth-first."""
 
-class SortingTree(BinaryGraph):
-    """A binary search tree built on BinaryGraph, right is > root, left < root"""
+    def dfs(self, start_node_id):
+        """Yield nodes in depth-first order, starting from start_node_id."""
+        if start_node_id not in self.nodes:
+            raise KeyError(f"Node {start_node_id} does not exist")
+        visited, stack = set(), [start_node_id]
+        while stack:
+            node = stack.pop()
+            if node in visited:
+                continue
+            visited.add(node)
+            stack.extend(self.successors(node))
+            yield node
 
-    def __init__(self):
-        """Set up the parent graph, then add a counter for making unique node ids."""
-        super().__init__()
-        self.next_node_number = 1
-        self.root_id = None
+    def bfs(self, start_node_id):
+        """Yield nodes in breadth-first order, starting from start_node_id."""
+        if start_node_id not in self.nodes:
+            raise KeyError(f"Node {start_node_id} does not exist")
+        visited, queue = set(), deque([start_node_id])
+        while queue:
+            node = queue.popleft()
+            if node in visited:
+                continue
+            visited.add(node)
+            queue.extend(self.successors(node))
+            yield node
 
-    def insert(self, value, current_id=None):
-        """Insert a value into the search tree, using recursion."""
-        if self.root_id is None:
-            new_id = f"{value}_{self.next_node_number}"
-            self.add_node(new_id, value)
-            self.next_node_number += 1
-            self.root_id = new_id
-            return
+class DAG(TraversableDigraph):
+    """A traversable digraph that refuses any edge that would create a cycle."""
 
-        if current_id is None:
-            current_id = self.root_id
-
-        current_value = self.get_node_value(current_id)
-
-        if value < current_value:
-            if "left" in self.edge_names.get(current_id, {}):
-                self.insert(value, self.get_node_left(current_id))
-            else:
-                new_id = f"{value}_{self.next_node_number}"
-                self.add_node_left(new_id, value, current_id)
-                self.next_node_number += 1
-        else:
-            if "right" in self.edge_names.get(current_id, {}):
-                self.insert(value, self.get_node_right(current_id))
-            else:
-                new_id = f"{value}_{self.next_node_number}"
-                self.add_node_right(new_id, value, current_id)
-                self.next_node_number += 1
-
-    def traverse(self, current_id=None):
-        """Return a sorted list of the tree's values, using recursion."""
-        if self.root_id is None:
-            return []
-
-        if current_id is None:
-            current_id = self.root_id
-
-        result = []
-        if "left" in self.edge_names.get(current_id, {}):
-            result += self.traverse(self.get_node_left(current_id))
-        result.append(self.get_node_value(current_id))
-        if "right" in self.edge_names.get(current_id, {}):
-            result += self.traverse(self.get_node_right(current_id))
-        return result
+    def add_edge(self, start_node_id, end_node_id, start_node_value=0,
+                 end_node_value=0, edge_name=None, edge_weight=0):
+        """Add an edge, raising ValueError if it would create a cycle."""
+        if start_node_id == end_node_id:
+            raise ValueError("An edge from a node to itself would create a cycle")
+        if start_node_id in self.nodes and end_node_id in self.nodes:
+            if start_node_id in self.bfs(end_node_id):
+                raise ValueError(
+                    f"Edge {start_node_id} -> {end_node_id} would create a cycle"
+                )
+        super().add_edge(start_node_id, end_node_id, start_node_value,
+                         end_node_value, edge_name, edge_weight)
